@@ -53,35 +53,58 @@ ggplot(data=homerange, mapping=aes(x=trophic.guild))+geom_bar(mapping=aes(fill=t
 
 **5. Which herbivorous mammals have homeranges greater than 1,000,000 m²? Show only the common name, order, mean homerange size, and mean body mass. Arrange the data in descending order by homerange size and show only the top 10 species.**
 ```{r}
-
+homerange%>%
+  select(common.name, order, mean.hra.m2, mean.mass.g) %>%
+  filter(mean.hra.m2>1000000)%>%
+  arrange(desc(mean.hra.m2))%>%
+  slice_max(mean.hra.m2, n=10)
 ```
 
 **6. Which two species have the largest and smallest homerange sizes?**
+Reindeer have the largest homerange sizes and rusty goby have the smallest homerange sizes.
 ```{r}
-
+homerange%>%
+  select(common.name, order, mean.hra.m2, mean.mass.g) %>%
+  slice_max(mean.hra.m2, n=1)
 ```
 
 ```{r}
-
+homerange%>%
+  select(common.name, order, mean.hra.m2, mean.mass.g) %>%
+  slice_min(mean.hra.m2, n=1)
 ```
 
 **7. Which carnivorous mammals have the largest homeranges?**
+Cheetah have the largest homeranges.
 ```{r}
-
+homerange%>%
+  select(common.name,class, mean.hra.m2, mean.mass.g, trophic.guild) %>%
+  filter(trophic.guild=="carnivore" & class=="mammalia")%>%
+  slice_max(mean.hra.m2, n=1)
 ```
 
 **8. Is there a relationship between body mass and homerange size? Make a scatterplot to show this relationship. Be sure to include appropriate labels and a title.**
+According to the graph, we cannot state whether there is a relationship between the two.
 ```{r}
-
+ggplot(data=homerange, mapping=aes(x=mean.mass.g, y=mean.hra.m2))+geom_point(na.em=T)+labs(title="Body mass vs. Homerange size")+geom_smooth(method=lm, se=T)
 ```
 
 **9. Use filter to extract the data for only birds and mammals. Then make a plot that compares the homerange sizes of these two groups. Be sure to include appropriate labels and a title.**
 ```{r}
-
+homerange_emphasize<-homerange %>%
+  select(common.name, class, mean.hra.m2, mean.mass.g) %>%
+  filter(class=="mammalia"|class=="aves")
 ```
-
-**10. Do one additional exploratory analysis of your choice. Before writing the code, write the question you are trying to answer. The question should be biologically meaningful and appropriate for the data. It must include at least one `filter()`, `select()`, and `arrange()`.**
 ```{r}
+ggplot(data=homerange_emphasize, mapping=aes(x=class, y=mean.hra.m2))+geom_boxplot(mapping=aes(fill=class))+scale_y_log10()+labs(title="Homerange size for Birds and Mammals")
+```
+**10. Do one additional exploratory analysis of your choice. Before writing the code, write the question you are trying to answer. The question should be biologically meaningful and appropriate for the data. It must include at least one `filter()`, `select()`, and `arrange()`.**
+question: What is the differences in home range size between animals with flying and swimming locomotion?
+```{r}
+homerange%>%
+  select(common.name, mean.hra.m2, class, locomotion, mean.mass.g)%>%
+  filter(locomotion=="swimming"| locomotion=="flying")%>%
+  arrange(desc(mean.hra.m2))
 
 ```
 
