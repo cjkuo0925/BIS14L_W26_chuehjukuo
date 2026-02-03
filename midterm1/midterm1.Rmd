@@ -85,6 +85,15 @@ anolis%>%
 #anolis %>%
  # count(species)%>%
  # ggplot(aes(x=species, y=n))+geom_col(mapping=aes(fill="island_f"))+labs(title="Number of Anole Species Sampled from Each Island")
+
+
+#Answer Key
+#anolis %>% 
+#ggplot(aes(x=island))+
+# geom_bar(aes(fill=island))+
+#  labs(title="Number of Anole Species Sampled from Each Island",
+#      x="Island",
+#     y="Number of Species")
 ```
 
 
@@ -101,6 +110,14 @@ anolis%>%
 #anolis %>%
  # select(species, habitat_f)%>%
  # ggplot(aes(x=habitat_f))+geom_bar(mapping=aes(fill=species))+labs(title="Number of Anole species from each Habitat Type")
+
+#Answer Key
+#anolis %>% 
+#ggplot(aes(x=habitat))+
+# geom_bar(aes(fill=habitat))+
+#  labs(title="Number of Anole Species Sampled from Each Habitat Type",
+#       x="Habitat Type",
+#      y="Number of Species")
 ```
 
 **Question 10. (4 points) The morphology of anoles varies based on their habitat. How does the range of hindlimb length compare among different habitats? Create a plot to visualize the distribution of hindlimb lengths across habitat types. Be sure to label your axes and add a title.**
@@ -167,6 +184,8 @@ anolis %>%
 
 
 **Problem 15. (5 points) The number of toepad lamellae is significantly different for trunk-crown species. But, is this consistent across all islands? Make a plot that shows the range in number of toepad lamellae by island for trunk-crown species only. Be sure to label your axes and add a title.**
+---> range usually refer to boxplot
+#Answer:_No, the number of toepad lamellae is inconsistent across islands. So, even though the trunk-crown lizards have the highest average overall there seems to be variation among islands._
 ```{r}
 anolis %>%
   select(toepad_lamellae_count, habitat_f, island_f)%>%
