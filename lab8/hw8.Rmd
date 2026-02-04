@@ -1,6 +1,6 @@
 ---
 title: "Homework 8"
-author: "Your Name Here"
+author: "CHUEH-JU KUO"
 date: "`r Sys.Date()`"
 output:
   html_document: 
@@ -71,7 +71,8 @@ fisheries_clean %>%
 ```
 
 7. In 2023, what were the top 10 most caught species? To keep things simple, assume `common_name` is sufficient to identify species. What does `NEI` stand for in some of the common names? How might this be concerning from a fisheries management perspective?
-NEI stands for not elsewhere included, which stand for it is grouping a general category of species but not report them individually. This could leads to deviation of data, which the reported data might be lower than actual. This could also cause bias when analyzing the data.
+
+NEI stands for not elsewhere included, meaning that multiple species are grouped together rather than reported individually. This could be concerning because this leads to deviation of data, which the reported data might be lower than actual. In fisheries management perspective, this could leads to overfishing of individual species and making inaccurate decesion on preparing its stock. 
 ```{r}
 fisheries_clean %>%
   select(period, catch, common_name) %>%
@@ -82,27 +83,38 @@ fisheries_clean %>%
 ```
 
 8. For the species that was caught the most above (not NEI), which country had the highest catch in 2023?
+Peru have the highest catch.
 ```{r}
 fisheries_clean %>%
   select(period, catch, country, common_name) %>%
-  filter(period=="2023" & common_name!="NEI") %>%
+  filter(period=="2023") %>%
   group_by(country, common_name) %>%
   summarize(sum_catch=sum(catch))%>%
   arrange(desc(sum_catch))
 ```
 
-9. How has fishing of this species changed over the last decade (2013-2023)? Create a  plot showing total catch by year for this species.
+9. How has fishing of this species changed over the last decade (2013-2023)? Create a plot showing total catch by year for this species.
 ```{r}
 fisheries_clean %>%
-  filter(2013 <= period <= 2023 & common_name=="") %>%
-  group_by(period)
+  select(period, catch, country, common_name)%>%
+  filter((period %in% 2013:2023), 
+           common_name=="Anchoveta(=Peruvian anchovy)") %>%
+  group_by(period) %>%
   summarize(sum_catch=sum(catch))%>%
-  ggplot(aes(x=period, y=sum_catch))+geom_col(fill=period)+labs(title = )
+  ggplot(aes(x=period, y=sum_catch))+
+  geom_col(mapping=aes(fill=period))+
+  labs(title="Fishing of Anchoveta Changed Over 2013-2023" )
 ```
 
-10. Perform one exploratory analysis of your choice. Make sure to clearly state the question you are asking before writing any code.
+10. Perform one exploratory analysis of your choice.Make sure to clearly state the question you are asking before writing any code.
+How does catch vary across Asian regions from 2013–2023?
 ```{r}
-
+fisheries_clean %>%
+  filter((period %in% 2013:2023), geo_region%in% c("Central Asia", "Southern Asia", "Eastern Asia", "Western Asia"), catch>0)%>%
+  ggplot(aes(x=geo_region, y=catch))+
+  geom_boxplot(mapping=aes(fill=geo_region))+
+  labs(title="Catch Distributions for Asia from 2013-2023")+
+  scale_y_log10()
 ```
 
 ## Knit and Upload
