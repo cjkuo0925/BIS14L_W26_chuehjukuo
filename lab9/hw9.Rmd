@@ -34,7 +34,7 @@ sydneybeaches
 ```
 
 2. Are these data "tidy" per the definitions of the tidyverse? How do you know? Are they in wide or long format?
-The data is not tidy, since Region are the same throughout the data. This is in wider format. 
+The data is not tidy, since Region are the same throughout the data and the names are not clean. This is in wider format. 
 ```{r}
 sydneybeaches%>%
   distinct(region)
@@ -53,16 +53,21 @@ sydneybeaches<-clean_names(sydneybeaches)
 ```{r}
 sydneybeaches_long <- sydneybeaches %>%
   select(date, enterococci_cfu_100ml, site)
+sydneybeaches_long
 ```
 
 4. Pivot the data such that the dates are column names and each beach only appears once (wide format). Name the object `sydneybeaches_wide`
 ```{r}
-
+sydneybeaches_wide <- sydneybeaches_long %>%
+  pivot_wider(names_from = "date", 
+              values_from ="enterococci_cfu_100ml")
 ```
 
 5. Pivot the data back so that the dates are data and not column names.
 ```{r}
-
+sydneybeaches_wide %>%
+    pivot_longer(-site, names_to="date", values_to="enterococci_cfu_100ml")
+  sydneybeaches_wide
 ```
 
 6. We haven't dealt much with dates yet, but separate the date into columns day, month, and year. Do this on the `sydneybeaches_long` data.
