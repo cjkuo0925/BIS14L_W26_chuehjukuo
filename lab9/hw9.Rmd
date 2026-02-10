@@ -37,12 +37,12 @@ sydneybeaches
 The data is not tidy, since Region are the same throughout the data and the names are not clean. This is in wider format. 
 ```{r}
 sydneybeaches%>%
-  distinct(region)
+  distinct(Region)
 ```
 
 ```{r}
 sydneybeaches%>%
-  distinct(site)
+  distinct(Site)
 ```
 
 ```{r}
@@ -53,7 +53,6 @@ sydneybeaches<-clean_names(sydneybeaches)
 ```{r}
 sydneybeaches_long <- sydneybeaches %>%
   select(date, enterococci_cfu_100ml, site)
-sydneybeaches_long
 ```
 
 4. Pivot the data such that the dates are column names and each beach only appears once (wide format). Name the object `sydneybeaches_wide`
@@ -67,27 +66,46 @@ sydneybeaches_wide <- sydneybeaches_long %>%
 ```{r}
 sydneybeaches_wide %>%
     pivot_longer(-site, names_to="date", values_to="enterococci_cfu_100ml")
-  sydneybeaches_wide
 ```
 
 6. We haven't dealt much with dates yet, but separate the date into columns day, month, and year. Do this on the `sydneybeaches_long` data.
 ```{r}
-
+sydneybeaches_long <- sydneybeaches_long%>%
+  separate(date, into=c("day", "month", "year"), sep="/")
 ```
 
 7. What is the average `enterococci_cfu_100ml` by year for each beach. Think about which data you will use- long or wide.
 ```{r}
-
+sydneybeaches_long %>%
+  select(year, enterococci_cfu_100ml, site) %>%
+  group_by(year,site) %>%
+  summarize(
+    ave_enterococci=mean(enterococci_cfu_100ml, 
+                                   na.rm = TRUE))
 ```
 
 8. Make the output from question 7 easier to read by pivoting it to wide format.
 ```{r}
-
+sydneybeaches_long <- sydneybeaches_long %>%
+  select(year, enterococci_cfu_100ml, site) %>%
+  group_by(year,site) %>%
+  summarize(
+    ave_enterococci=mean(enterococci_cfu_100ml, 
+                                   na.rm = TRUE)) %>%
+  pivot_wider(names_from = "site", 
+              values_from ="ave_enterococci")
 ```
 
 9. What was the most polluted beach in 2013?
+Little Bay Beach was the most polluted beach in 2013 since it have the highest average enterococci_cfu_100ml.
 ```{r}
-
+sydneybeaches_long %>%
+  filter(year=="2013")%>%
+  pivot_longer(-year,
+               names_to = "beach", 
+              values_to = "ave_enterococci") %>%
+  arrange(desc(ave_enterococci))
+  
 ```
 
 ```{r}
@@ -95,8 +113,16 @@ sydneybeaches_wide %>%
 ```
 
 10. Explore the data! Do one analysis of your choice that includes a minimum of three lines of code.  
+How is the enterococci_cfu_100ml of Little Bay Beach changed over sample period?(since it has the highest amounts of ecoli in 2013)
 ```{r}
-
+sydneybeaches_long%>%
+  pivot_longer(-year,
+               names_to = "beach", 
+              values_to = "ave_enterococci") %>%
+  filter(beach=="Little Bay Beach")%>%
+  ggplot(aes(x=as.integer(year), y=ave_enterococci))+geom_point()+
+  geom_line() +labs(title="Amount of Enterococci changed from 2013-2018", x="year", y="ave_enterococci")
+  
 ```
 
 ## Knit and Upload
