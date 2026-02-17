@@ -151,7 +151,7 @@ income_cat2000%>%
 ```{r}
 income_cat2000%>%
   drop_na(income_caegory) %>% #get rid of NA
-  ggplot(aes(x=income_category, fill=income_caegory))+geom_bar()+ #lab title
+  ggplot(aes(x=income_category, fill=income_caegory))+geom_bar() #lab title
 ```
 
 ## That's it! Let's take a break!  
