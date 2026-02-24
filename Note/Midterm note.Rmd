@@ -2,8 +2,8 @@
 title: "Midterm Note"
 output: html_notebook
 ---
-
-#Replace Value to NAs
+#This note have details related to NA(1-3), merging table(,Maps(4-), and Shiny apps()
+#Replace Value to NAs(for more details: refer to labs 13.1)
 1. if there is only one specific value (like -999) with NA across the entire data set./ is it is a string then
 ```{r}
 life_history%>%
@@ -37,3 +37,4 @@ amniota_no_na%>%
   summarize(total_na=sum(n_miss))
 ```
 
+4.
