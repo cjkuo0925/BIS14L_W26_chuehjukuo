@@ -1,0 +1,70 @@
+---
+title: "Midterm Note(NA and Merge Table)"
+output: html_notebook
+---
+
+#Replace Value to NAs(for more details: refer to labs 13.1)
+1. if there is only one specific value (like -999) with NA across the entire data set./ is it is a string then
+```{r}
+life_history%>%
+  replace_with_na_all(condition=~.x ==-999)%>%
+  miss_var_summary() #mutate(newborn=na_if(newborn, "not measure"))
+```
+
+2. if there is mutiple values you want to replace with NA(use %in%)
+```{r}
+amniota_no_na<-amniota %>% 
+  replace_with_na_all(condition=~.x %in% c(-999, -999.00, -999.00000, -999.000))
+```
+
+by selecting which variables
+```{r}
+amniota_no_na <- amniota_no_na %>%
+  mutate(across(c(birth_or_hatching_weight_g, 
+                  adult_body_mass_g,
+                  no_sex_body_mass_g),
+                ~na_if(., 0)))
+```
+
+3. count numbers of NA and its percentage, if also need the total number of na
+```{r}
+miss_var_summary(amniota_no_na)
+```
+
+```{r}
+amniota_no_na%>%
+  miss_var_summary()%>%
+  summarize(total_na=sum(n_miss))
+```
+
+#Merging Table
+1. Generally there is just 4 types:
+```{r}
+inner_join(table_a, table_b, by="customer_ID") 
+#only keeps the rows that have matching values in both tables
+```
+
+```{r}
+left_join(table_a, table_b, by="customer_ID")
+#keeps all the rows in the first table and only the matching rows in the second table
+#If there is no match, it fills in with NA.
+```
+
+```{r}
+right_join(table_a, table_b, by="customer_ID")
+#keeps all the rows in the second table and only the matching rows in the first table
+#If there is no match, it fills in with NA.
+```
+
+```{r}
+full_join(table_a, table_b, by="customer_ID")
+#keeps all the rows in both tables and fills in with NA where there is no match.
+```
+
+```{r}
+anti_join(table_a, table_b, by="customer_ID") 
+#use to troubleshoot problematic joins
+#Provides the rows in the first table for which there are not matching values in the second table.
+```
+
+convert date to certain format use:ymd, mdy .....(mutate(date=dmy(date))

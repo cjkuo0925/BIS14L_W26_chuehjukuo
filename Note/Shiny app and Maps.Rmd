@@ -1,0 +1,157 @@
+---
+title: "Midterm Note(NA and Merge Table)"
+output: html_notebook
+---
+
+#Building a Map(14.1)
+1. for non interactive map
+```{r}
+#install.packages("ggmap")
+library(ggmap)
+#install.packages("leaflet")
+library(leaflet)
+```
+
+```{r}
+register_stadiamaps("e657eb25-4f59-4cb8-ad44-c7688b0d8400", write = FALSE)
+```
+
+then load the data,
+
+set the bounding box 
+```{r}
+lat <- c(34.67, 41.80)
+log <-c(-124.1, -115.5)
+bbox <- make_bbox(log,lat, f=0.03) 
+#bounding box — the rectangular geographic area that contains all your data points
+#f act as buffer
+```
+
+```{r}
+map1 <- get_stadiamap(bbox, maptype="stamen_terrain", zoom= 7) #higher zoom numbers means more details
+```
+
+adding points from your dataset
+```{r}
+ggmap(map1)+ #will display just the map
+  geom_point(data=spiders, aes(longitude, latitude), size=0.75, color="black", alphs=0.8)+
+  labs(x="Longtitude", y="latitude", title="CA Usofila Records")
+```
+
+2. making interactive map graph(able to zoom in and out)
+this step is essential
+```{r}
+sharksf%>%
+  summarize(lon_min=min(longitude, na.rm = T),
+            lon_max=max(longitude, na.rm = T),
+            lat_min=min(latitude, na.rm = T),
+            lat_max=max(latitude, na.rm = T))
+```
+
+making variables
+```{r}
+lon_min <- -124.13	
+lon_max <- -115.49	
+lat_min <- 34.67	
+lat_max <- 41.8
+```
+
+```{r}
+leaflet(spiders) %>%
+  # Add a base map layer (terrain-style map from Stadia / Stamen)
+  addProviderTiles(providers$Stadia.StamenTerrain) %>%
+  # Add point markers for each observation
+  addCircleMarkers(
+    lng = ~longitude,   # Use the 'longitude' column for x-coordinate
+    lat = ~latitude,    # Use the 'latitude' column for y-coordinate
+    radius = 2,         # Small circle size
+    stroke = FALSE,     # Remove circle border (outline)
+    fillOpacity = 0.7   # Make circles slightly transparent
+  ) %>%
+  
+  #Add a scale bar to show map distance
+  addScaleBar(position = "bottomleft") %>%
+  
+  #Zoom and center the map to a specified bounding box
+  fitBounds(
+    lng1 = lon_min, lat1 = lat_min,  # Southwest corner (min longitude & latitude)
+    lng2 = lon_max, lat2 = lat_max   # Northeast corner (max longitude & latitude)
+  )
+```
+
+#Shiny Apps(14.2)
+Reference the cheat sheet for other options, otherwise just kind if manipulate this code chuck for some changes
+```{r}
+library(shiny)
+
+ui <- fluidPage(
+  selectInput("x", 
+              "Select X Variable",
+              choices= c("bill_length_mm",
+                         "bill_depth_mm",
+                         "flipper_length_mm",
+                         "body_mass_g"),
+              selected="bill_length_mm"),
+  
+   selectInput("y", 
+              "Select Y Variable",
+              choices= c("bill_length_mm",
+                         "bill_depth_mm",
+                         "flipper_length_mm",
+                         "body_mass_g"),
+              selected="bill_length_mm"),
+  checkboxInput("show_lm",
+                "Show best-fit line(lm)",
+                value=FALSE),
+                
+  plotOutput("plot", 
+             width="500px",
+             height="400px")
+)
+
+server <- function(input, output, session) {
+  output$plot <- renderPlot({
+    
+    ggplot(penguins,
+           aes(x= .data[[input$x]],
+               y=.data[[input$y]]))+
+      geom_point(na.rn=T)+
+      if(input$show_lm)
+        geom_smooth(method="lm", se=F, na.rm=TRUE)
+    else
+      NULL
+  })
+}
+
+shinyApp(ui, server)
+```
+
+&
+
+```{r}
+library(shiny)
+
+ui <- fluidPage(
+  selectInput("x", 
+              "Select Fill",
+              choices= c("thermoregulation",
+                         "trophic_guild"),
+              selected="trophic_guild"),
+                
+  plotOutput("plot")
+)
+
+server <- function(input, output, session) {
+  
+  output$plot <- renderPlot({
+    ggplot(data=homerange,
+           aes_string(x="locomotion", 
+               fill=input$x))+
+  geom_bar(position="dodge", alphs=0.8, color="black")+
+      labs(x=NULL, Y=NULL, fill="Fill Variable")
+  })
+}
+
+shinyApp(ui, server)
+```
+

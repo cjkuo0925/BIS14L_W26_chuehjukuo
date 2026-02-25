@@ -70,6 +70,7 @@ spiders%>%
   select(latitude, longitude)%>%
   summary()
 ```
+
 ```{r}
 names(spiders)
 ```
@@ -124,17 +125,15 @@ Build the interactive map using Stadia maps.
 leaflet(spiders)%>%
   addProviderTiles(providers$Stadia.StamenTerrain)%>%
   addCircleMarkers(
-    lng=~longtitude,
+    lng=~longitude,
     lat=~latitude,
     radius=2,
     stroke=FALSE,
-    fill0pacity=0.7
+    fillOpacity=0.7
     ) %>%
   addScaleBar(position="bottomleft")%>%
-  fitBounds(lng1=lon_min,
-          lat1=lat_min,
-          lng2=lon_max,
-          lat2=lat_max)
+  fitBounds(lng1=lon_min, lat1=lat_min,
+          lng2=lon_max, lat2=lat_max)
 ```
 
 Build the same interactive map using default OpenStreet maps.
@@ -142,11 +141,11 @@ Build the same interactive map using default OpenStreet maps.
 leaflet(spiders)%>%
   addTiles()%>%
   addCircleMarkers(
-    lng=~longtitude,
+    lng=~longitude,
     lat=~latitude,
     radius=2,
     stroke=FALSE,
-    fill0pacity=0.7
+    fillOpacity=0.7 #it is a O
     ) %>%
   addScaleBar(position="bottomleft")%>%
   fitBounds(lng1=lon_min,
@@ -160,26 +159,36 @@ For this practice we will use data on the distribution of grizzly bears in Alask
 
 1. Load the `grizzly` data and evaluate its structure.  
 ```{r message=FALSE, warning=FALSE}
-
+grizzly<- read_csv("data/bear-sightings.csv")
 ```
 
 2. Use the range of the latitude and longitude to build an appropriate bounding box for your map.  
 ```{r}
+grizzly%>%
+  select(latitude, longitude)%>%
+  summary()
+```
 
+```{r}
+log <- c(-166.2, -131.3)
+lat <-c(55.02, 70.37)
+bbox <- make_bbox(log,lat, f=0.03)
 ```
 
 3. Load a map from `stadiamaps` in a `stamen_terrain` projection and display the map.
 ```{r}
-
+map1 <- get_stadiamap(bbox, maptype="stamen_terrain", zoom=5)
 ```
 
 ```{r}
-
+ggmap(map1)
 ```
 
 4. Build a final map that overlays the recorded observations of grizzly bears in Alaska.  
 ```{r}
-
+ggmap(map1)+
+  geom_point(data=grizzly, aes(longitude, latitude), size=0.8)+
+  labs(x="Longitude", y="Latitude", title="Ursos horriblus")
 ```
 
 -->[Home](https://jmledford3115.github.io/datascibiol/)
