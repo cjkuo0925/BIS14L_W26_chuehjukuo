@@ -147,8 +147,44 @@ server <- function(input, output, session) {
     ggplot(data=homerange,
            aes_string(x="locomotion", 
                fill=input$x))+
-  geom_bar(position="dodge", alphs=0.8, color="black")+
+  geom_bar(position="dodge", alphas=0.8, color="black")+
       labs(x=NULL, Y=NULL, fill="Fill Variable")
+  })
+}
+
+shinyApp(ui, server)
+```
+
+&
+
+```{r}
+ui <- fluidPage(
+  selectInput("x", 
+              "Select order",
+              choices= sort(unique(gestation$order)),
+              selected="Afrosoricida"),
+  selectInput("y", 
+              "Select Y Variable",
+              choices= c("bodymass",
+                         "longevity",
+                         "gestationlength"),
+              selected="bodymass"),
+  helpText("Thodoris Danis, Antonis Rokas; The evolution of gestation length in eutherian mammals. Proc. Biol. Sci. 1 October 2024; 291 (2033): 20241412. https://doi.org/10.1098/rspb.2024.1412"),
+                
+  plotOutput("plot", 
+             width="500px",
+             height="400px")
+)
+
+server <- function(input, output, session) {
+  output$plot <- renderPlot({
+    
+    gestation%>%
+      filter(input$x==.data[["order"]])%>%
+      ggplot(aes(.data[[input$y]]))+
+      geom_density(color="black", fill="steelblue", alpha=0.7)+
+      theme_minimal()
+      
   })
 }
 
