@@ -236,10 +236,10 @@ homerange %>%
 homerange %>% 
   ggplot(aes(x=taxon, y=log10_mass, fill=thermoregulation))+
   geom_boxplot()+
-  facet_grid(trophic_guid~thermoregulation~., labeller=label_both)+ 
-  theme(axis.text.x=element_text(angel=60, hjust=1),
-        legent.position="none",
-        strip_text=element_text(size=12, face="bold"))
+  facet_grid(trophic_guild~thermoregulation, labeller=label_both)+
+  theme(axis.text.x=element_text(angle=60, hjust=1),
+        legend.position="none",
+        strip.text=element_text(size=8, face="bold"))
 ```
 
 ## Practice

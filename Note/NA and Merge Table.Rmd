@@ -37,7 +37,7 @@ amniota_no_na%>%
   summarize(total_na=sum(n_miss))
 ```
 
-#Merging Table
+#Merging Table(13.2)
 1. Generally there is just 4 types:
 ```{r}
 inner_join(table_a, table_b, by="customer_ID") 

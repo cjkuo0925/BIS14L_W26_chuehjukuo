@@ -1,5 +1,5 @@
 ---
-title: "Midterm Note(NA and Merge Table)"
+title: "Shiny App and Map"
 output: html_notebook
 ---
 
@@ -79,8 +79,9 @@ leaflet(spiders) %>%
   )
 ```
 
-#Shiny Apps(14.2)
+#Shiny Apps(14.2 & 15.1 & 15.2)
 Reference the cheat sheet for other options, otherwise just kind if manipulate this code chuck for some changes
+1. basic format of Shiny app 
 ```{r}
 library(shiny)
 
@@ -126,37 +127,7 @@ server <- function(input, output, session) {
 shinyApp(ui, server)
 ```
 
-&
-
-```{r}
-library(shiny)
-
-ui <- fluidPage(
-  selectInput("x", 
-              "Select Fill",
-              choices= c("thermoregulation",
-                         "trophic_guild"),
-              selected="trophic_guild"),
-                
-  plotOutput("plot")
-)
-
-server <- function(input, output, session) {
-  
-  output$plot <- renderPlot({
-    ggplot(data=homerange,
-           aes_string(x="locomotion", 
-               fill=input$x))+
-  geom_bar(position="dodge", alphas=0.8, color="black")+
-      labs(x=NULL, Y=NULL, fill="Fill Variable")
-  })
-}
-
-shinyApp(ui, server)
-```
-
-&
-
+2. Shiny app with two variables
 ```{r}
 ui <- fluidPage(
   selectInput("x", 
@@ -184,6 +155,84 @@ server <- function(input, output, session) {
       ggplot(aes(.data[[input$y]]))+
       geom_density(color="black", fill="steelblue", alpha=0.7)+
       theme_minimal()
+      
+  })
+}
+
+shinyApp(ui, server)
+```
+
+3. Shiny app with kind of web pages(with sidebar on)
+```{r}
+ui <- dashboardPage(
+  
+  dashboardHeader(title="Distribution ofGestation Length by Order"),
+  
+  dashboardSidebar(
+    
+  selectInput("x", 
+              "Select order",
+              choices= sort(unique(gestation$order)),
+              selected="Afrosoricida"),
+  selectInput("y", 
+              "Select Y Variable",
+              choices= c("bodymass",
+                         "longevity",
+                         "gestationlength"),
+              selected="bodymass")),
+  
+  dashboardBody(
+                
+  plotOutput("plot", 
+             width="500px",
+             height="400px")
+    
+  )
+)
+
+server <- function(input, output, session) {
+  output$plot <- renderPlot({
+    
+    gestation%>%
+      filter(input$x==.data[["order"]])%>%
+      ggplot(aes(.data[[input$y]]))+
+      geom_density(color="black", fill="steelblue", alpha=0.7)+
+      theme_minimal()
+      
+  })
+}
+
+shinyApp(ui, server)
+```
+
+4.Shiny app with more complicated setting
+```{r}
+ui <- dashboardPage(
+  
+  dashboardHeader(title="Distribution ofGestation Length by Order"),
+  
+  dashboardSidebar(
+    
+  selectInput("x", 
+              "Select population",
+              choices= sort(unique(wolves$pop)),#don't need totype every popuation
+              selected="AK.PEN")),
+  
+  dashboardBody(
+                
+  plotOutput("plot", 
+             width="500px",
+             height="400px")
+    
+  )
+)
+
+server <- function(input, output, session) {
+  output$plot <- renderPlot({
+    wolves %>% 
+      filter(sex!="NA" & pop==input$x) %>% 
+      ggplot(aes(x=sex, fill=sex))+
+      geom_bar(alphas=0.8, color="black")
       
   })
 }

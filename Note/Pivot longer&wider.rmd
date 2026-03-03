@@ -1,0 +1,53 @@
+---
+title: "Pivot Longer"
+output: html_notebook
+---
+
+pivot_loner 9.1
+pivot_wider&separate 9.2
+summarize()` is a verb in `dplyr` that allows us to produce summaries of data. 8.1
+group_by()` allows us to group data by a categorical variable(s) of interest.  8.1
+
+#distinct() looks for all unique observations in rows 6.1
+What if we want to know which islands each species occurs on?
+```{r}
+penguins %>%
+  distinct(species, island,.keep_all=T) #kepp all kept all the variables
+```
+
+##if_else()
+```{r}
+mammals %>%
+  select(genus, species, newborn) %>%
+  mutate(newborn_new=ifelse(newborn == -999.00, NA, newborn)) #if,(action), else
+```
+
+1. Following the example above, convert all -999 values in the mammals dataframe to NA.
+```{r}
+mammals <- mammals %>% #this step is important
+  mutate(across(c(mass, 
+                  wean_mass, 
+                  gestation, 
+                  max_life, 
+                  newborn, 
+                  weaning, 
+                  litter_size, 
+                  afr, 
+                  litters_year), 
+                ~ifelse(.==-999, NA, .)))
+```
+
+## Counts 7.1
+```{r}
+msleep %>%
+  count(vore) %>%
+  ggplot(aes(x=vore, y=n))+geom_col() #use geom_col when we have x and y
+```
+
+#n_distinct() is a handy way of cleanly presenting the number of distinct observations.
+Here we show the number of distinct genera over 100 in body weight.
+```{r}
+msleep%>%
+  filter(bodywt >100) %>%
+  summarize(n_genera=n_distinct(genus))
+```

@@ -1,0 +1,88 @@
+---
+title: "quick note from hw"
+output: html_notebook
+---
+
+1.count number of dataset of a column
+```{r}
+n_distinct(gapminder$country)
+```
+
+
+2. Which five countries have had the largest absolute population growth between 1925-2025? Show this as a table.
+```{r}
+gapminder %>%
+  filter(year %in% c(1925, 2025))%>%
+  select(country, year, pop)%>%
+  pivot_wider(names_from = year, 
+              values_from = pop, 
+              names_prefix = "pop_")%>%
+  group_by(country)%>%
+  mutate(ppl_grwoth_absolute=pop_2025-pop_1925)%>%
+  arrange(desc(ppl_grwoth_absolute))
+```
+
+3. If you want to draw the line for top five country the code will be like this
+```{r}
+gapminder %>%
+  filter((year>=1925 &year<=2025)&country%in%c("India", "China", "Indonesia", "Pakistan", "USA"))%>%
+  ggplot(aes(x=year, y=pop, color=country))+
+  geom_point()+
+  geom_line()+ 
+  labs(title="Population Growth Over Time", x="Year", y="Population Growth Over Time")
+```
+
+4. Has global life expectancy changed between 1925 and 2025? Show the min, median, mean, and max for all countries (combined) in the dataset.
+```{r}
+gapminder %>%
+  filter(year %in% c(1925, 2025))%>%
+  group_by(year)%>%
+  summarize(min_lex=min(lex, na.rm=T),
+         max_lex=max(lex, na.rm=T),
+         mean_lex=mean(lex, na.rm=T),
+         median_lex=median(lex, na.rm=T))
+```
+
+5.Make a plot that shows the distribution of life expectancy for all countries in 1925 and 2025 (try using `geom_density`). What do you notice about the shift in life expectancy over time?
+```{r}
+gapminder %>%
+  filter(year %in% c(1925, 2025))%>% #this give only 1925 and 2025
+  mutate(year=factor(year))%>%
+  ggplot(aes(x=lex, fill=year, color=year))+
+  geom_density(alpha=0.3)+
+  labs(title="Distribution of Life Expetancy, 1925 ad 2025",
+       x="Life Expectancy(years)",
+       y=NULL, 
+       color="year",
+       fill="year")
+```
+
+6. (hw10) Are there any "hotspots" for shark incidents in California? Show the top five counties with the most incidents.
+```{r}
+sharks%>%
+  select(county, incident_num)%>%
+  group_by(county)%>%
+  count(incident_num) %>%
+  summarize(total_incident=sum(n))%>%
+  arrange(desc(total_incident))%>%
+  slice_max(total_incident, n=5)
+```
+
+7. Are there months of the year when incidents are more likely to occur? Make a plot that shows the total number of incidents by month. Which month has the highest number of incidents? 
+```{r}
+sharks%>%
+  select(month, incident_num)%>%
+  group_by(month)%>%
+  count(incident_num)%>%
+  ggplot(aes(x=as.factor(month), y=n))+geom_col()+labs(title="Total number of incidents for each month", x="month", y="count of incident")
+```
+
+7. In the data, `mode` refers to a type of activity. Which activity is associated with the highest number of incidents?
+```{r}
+sharks%>%
+  select(mode, incident_num)%>%
+  group_by(mode)%>%
+  count(incident_num, name="total_incident_mode")%>%
+  summarize(total_incident_mode=sum(total_incident_mode, na.rm=T))%>%
+  arrange(desc(total_incident_mode))
+```

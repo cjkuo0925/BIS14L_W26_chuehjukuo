@@ -1,0 +1,165 @@
+---
+title: "Graphing stuff"
+output: html_notebook
+---
+
+- fill is interchangable with group it is just group won't color the graph
+
+#advanced graphing(11.1)
+```{r}
+options(scipen=999) #cancels the use of scientific notation for the session
+```
+
+#1. Line Graph
+```{r}
+gap %>%
+  filter(year>=2000 & year <= 2025 & country=="USA") %>%
+  ggplot(aes(x=year, y=gdp))+
+  geom_line(color="red")+ #line graph
+  geom_point(shape=5)+ #choose the shape
+  scale_x_continuous(breaks=seq(2000,2025, by=5))+  
+  #scale_x_continuous() modifies the x-axis for continuous numeric variables
+  #breaks = specifies the exact tick marks to display on the x-axis.
+  #seq(2000, 2025, by = 5) generates a numeric sequence from 2000 to 2025
+  theme(axis.text.x=element_text(angle=60, hjust=1))+
+  labs(title="GDP per Capita in the USA, 2000-2025", x="Year", y="GDP")
+```
+
+for function scale_x_continuous
+```{r}
+scale_x_continuous(
+  breaks = 2000:2025,
+  minor_breaks = NULL
+  # breaks = 2000:2025 creates tick marks at every integer year
+  # from 2000 to 2025 (2000, 2001, 2002, ..., 2025).
+  #
+  # minor_breaks = NULL removes the smaller secondary tick marks
+  # that ggplot would normally add between major breaks.
+)
+```
+
+#2. Histogram 
+```{r}
+gap%>%
+  filter(year==1935)%>%
+  ggplot(aes(x=lex))+
+  geom_histogram(color="black", fill="turquoise4", bins=30)+
+  labs(title="Distribution of Life Expectancy")
+```
+
+#3. Density Graph
+```{r}
+gap%>%
+  filter(year==1935)%>%
+  ggplot(aes(x=lex))+
+  geom_density(color="black", fill="turquoise4", alpha=0.7)+ #alpha is the transparency
+  labs(title="Distribution of Life Expectancy")
+```
+
+Density+histogram
+```{r}
+gap%>%
+  filter(year==1940)%>%
+  ggplot(aes(x=lex))+
+  geom_histogram(aes(y=after_stat(density)), color="black", fill="turquoise4")+
+  geom_density(color="red")
+```
+
+#4.geom_col(10.1)
+```{r}
+life_history %>%
+  count(order, sort=T) %>% 
+  ggplot(aes(x=order, y=n))+geom_col()+labs(title="observations for each order of mammals ")+coord_flip() #flips the x and y axis
+```
+
+- bar plot of the mean mass for each order?
+```{r}
+life_history %>%
+  group_by(order)%>%
+  summarize(mean_mass=mean(mass, na.rm=T)) %>% 
+  ggplot(aes(x=order, y=mean_mass))+geom_col()+coord_flip()
+```
+
+- make the graph 排列 with 順序 using `reorder`.
+```{r}
+life_history %>%
+  group_by(order)%>%
+  summarize(mean_mass=mean(mass, na.rm=T)) %>% 
+  ggplot(aes(x=reorder(order, mean_mass), y=mean_mass))+geom_col()+coord_flip()+scale_y_log10()
+```
+
+-We can adjust the plot further by specifying the size and face of the text using `theme()`. 
+- `rel()` option changes the relative size of the title.
+-`hjust` controls the title position.
+```{r}
+life_history %>%
+  ggplot(aes(x=mass, y=litter_size))+
+  geom_point(na.rm=T)+
+  scale_x_log10()+
+  geom_smooth(method=lm, se=F, na.rm=T)+
+  labs(title="Mass vs. Litter Size", x="Mass(g)", y="Litter Size")+
+  theme(plot.title=element_text(size=rel(1.5), hjust=.5))
+```
+
+bar plot samples:
+```{r}
+homerange%>%
+  ggplot(aes(x=taxon, fill=trophic_guild))+geom_bar(position="dodge")+theme(axis.text.x=element_text(angle=60, hjust=0.85))+labs(title="Observation by Taxon", x="Taxonomic Group", y=NULL)
+```
+
+#case_when function
+- which allows us to calculate a new variable from other variables.
+- allows us to specify multiple conditions
+```{r}
+income_cat2000<- gap %>%
+  filter(year==2000)%>%
+  mutate(income_category=case_when(gdp<=1100 ~ "low",
+                                   gdp>1100& gdp <=4500 ~ "low_middle",
+                                   gdp>4500 & gdp<=13900 ~ "upper_middle",
+                                   gdp>13900 ~ "high")) %>%
+  select(country, gdp, income_category) %>%
+  mutate(income_caegory=factor(income_category,
+                               levels=c("low",
+                                        "low_middle",
+                                        "upper_middle",
+                                        "high")))
+```
+
+## Faceting(11.2)
+- allow us to make muti-panel plots for easy comparison
+
+#1. boxplot examples - facet_wrap()
+- makes a ribbon of panels by a specified categorical variable and allows you to control how you want them arranged.
+```{r}
+homerange %>% 
+  ggplot(aes(x=taxon, y=log10_mass, fill=thermoregulation))+
+  geom_boxplot()+
+  facet_wrap(~trophic_guild, nrow=2, labeller=label_both)+ 
+  #trophic_guild is a column, sort by carnivore/herbivore
+  theme(axis.text.x=element_text(angel=60, hjust=1),
+        legent.position="none",
+        strip_text=element_text(size=12, face="bold"))
+```
+
+#2. facet_grid() allows control over the faceted variable; it can be arranged in rows or columns. rows~columns
+```{r}
+homerange %>% 
+  ggplot(aes(x=taxon, y=log10_mass, fill=thermoregulation))+
+  geom_boxplot()+
+  facet_grid(thermoregulation~., labeller=label_both)+ 
+  theme(axis.text.x=element_text(angel=60, hjust=1),
+        legent.position="none",
+        strip_text=element_text(size=12, face="bold"))
+```
+
+- will also allow the comparison of two categorical variables, just remember a~b where a is rows and b is columns. 
+```{r}
+homerange %>% 
+  ggplot(aes(x=taxon, y=log10_mass, fill=thermoregulation))+
+  geom_boxplot()+
+  facet_grid(trophic_guild~thermoregulation, labeller=label_both)+
+  theme(axis.text.x=element_text(angle=60, hjust=1),
+        legend.position="none",
+        strip.text=element_text(size=8, face="bold"))
+```
+
